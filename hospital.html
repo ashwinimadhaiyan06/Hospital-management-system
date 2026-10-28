@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareFlow Hospital Dashboard</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6ff;color:#26334d}
+header{background:linear-gradient(120deg,#173b91,#5685ff);color:white;padding:24px;text-align:center}
+header h1{margin:0}
+.container{max-width:1100px;margin:25px auto;padding:0 15px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px}
+.card{background:white;padding:22px;border-radius:14px;box-shadow:0 4px 15px #0001;border-left:5px solid #5279f5}
+.card p{color:#68758d;margin:0}
+.card h2{font-size:32px;color:#315de5;margin:12px 0 0}
+.panel{background:white;padding:22px;border-radius:14px;margin-top:22px;box-shadow:0 4px 15px #0001}
+input,select,button{padding:12px;border:1px solid #d5dced;border-radius:8px;font-size:15px}
+input,select{flex:1;min-width:150px}
+button{background:#315de5;color:white;border:none;cursor:pointer}
+button:hover{background:#1d43ad}
+form{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #e8edf5}
+th{background:#eef2ff;color:#2449a0}
+.table-wrap{overflow-x:auto}
+.delete{background:#dc3545}
+.paid{background:#198754}
+.section-title{color:#2449a0}
+nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:15px;background:white}
+nav button{background:#eaf0ff;color:#2449a0}
+section{display:none}
+section.active{display:block}
+.doctor{background:#edf2ff;padding:15px;border-radius:10px;margin:12px 0}
+#message{color:#16834a;margin-top:10px}
+footer{text-align:center;padding:20px;color:#667085}
+@media(max-width:600px){.panel{padding:14px}}
+</style>
+</head>
+
+<body>
+<header>
+<h1>🏥 CareFlow Hospital</h1>
+<p>Hospital Management Dashboard</p>
+</header>
+
+<nav>
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('patients')">Patients</button>
+<button onclick="show('appointments')">Appointments</button>
+<button onclick="show('doctors')">Doctors</button>
+<button onclick="show('billing')">Billing</button>
+</nav>
+
+<div class="container">
+<div id="message"></div>
+
+<section id="dashboard" class="active">
+<h2 class="section-title">Dashboard Overview</h2>
+<div class="stats">
+<div class="card"><p>👥 Total Patients</p><h2 id="patientCount">0</h2></div>
+<div class="card"><p>📅 Appointments</p><h2 id="appointmentCount">0</h2></div>
+<div class="card"><p>🧾 Total Bills</p><h2 id="billCount">0</h2></div>
+<div class="card"><p>💰 Paid Revenue</p><h2 id="revenue">₹0</h2></div>
+</div>
+<div class="panel">
+<h2>Welcome to CareFlow</h2>
+<p>Manage your hospital patients, appointments, doctors and billing.</p>
+<img src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1100&q=80" alt="Hospital" style="width:100%;max-height:300px;object-fit:cover;border-radius:10px">
+</div>
+</section>
+
+<section id="patients">
+<div class="panel">
+<h2 class="section-title">Add Patient</h2>
+<form id="patientForm">
+<input id="patientName" placeholder="Patient name" required>
+<input id="patientAge" type="number" min="1" max="120" placeholder="Age" required>
+<select id="gender" required><option value="">Gender</option><option>Male</option><option>Female</option><option>Other</option></select>
+<input id="phone" placeholder="Phone number" required>
+<button>Add Patient</button>
+</form>
+<input id="search" placeholder="Search patient..." oninput="renderPatients()" style="width:100%;margin-bottom:15px">
+<div class="table-wrap">
+<table>
+<thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Phone</th><th>Action</th></tr></thead>
+<tbody id="patientsTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section id="appointments">
+<div class="panel">
+<h2 class="section-title">Book Appointment</h2>
+<form id="appointmentForm">
+<input id="appointmentPatient" placeholder="Patient name" required>
+<input id="doctorName" placeholder="Doctor name" required>
+<input id="appointmentDate" type="date" required>
+<input id="appointmentTime" type="time" required>
+<button>Book Appointment</button>
+</form>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr></thead>
+<tbody id="appointmentsTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section id="doctors">
+<div class="panel">
+<h2 class="section-title">Doctor Schedules</h2>
+<div class="doctor"><h3>Dr. Arun Kumar</h3><p>General Physician</p><p>Mon–Sat | 9 AM–1 PM</p></div>
+<div class="doctor"><h3>Dr. Priya Sharma</h3><p>Cardiologist</p><p>Mon–Fri | 2 PM–5 PM</p></div>
+<div class="doctor"><h3>Dr. Rahul</h3><p>Pediatrician</p><p>Mon–Sat | 10 AM–4 PM</p></div>
+<div class="doctor"><h3>Dr. Meena</h3><p>Dermatologist</p><p>Tue–Sat | 11 AM–3 PM</p></div>
+</div>
+</section>
+
+<section id="billing">
+<div class="panel">
+<h2 class="section-title">Create Bill</h2>
+<form id="billForm">
+<input id="billPatient" placeholder="Patient name" required>
+<input id="description" placeholder="Bill description" required>
+<input id="amount" type="number" min="1" step="0.01" placeholder="Amount ₹" required>
+<button>Create Bill</button>
+</form>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Patient</th><th>Description</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+<tbody id="billsTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+</div>
+
+<footer>CareFlow Hospital Management System</footer>
+
+<script>
+const patients=[];
+const appointments=[];
+const bills=[];
+let id=1;
+
+function show(page){
+document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+document.getElementById(page).classList.add("active");
+document.getElementById("message").textContent="";
+}
+function notify(text){document.getElementById("message").textContent=text;}
+function cell(row,value){
+const td=document.createElement("td");
+td.textContent=value;
+row.appendChild(td);
+return td;
+}
+function button(text,cls,fn){
+const b=document.createElement("button");
+b.textContent=text;b.className=cls;b.type="button";b.onclick=fn;
+return b;
+}
+
+document.getElementById("patientForm").onsubmit=e=>{
+e.preventDefault();
+patients.push({
+id:id++,
+name:document.getElementById("patientName").value.trim(),
+age:document.getElementById("patientAge").value,
+gender:document.getElementById("gender").value,
+phone:document.getElementById("phone").value.trim()
+});
+e.target.reset();renderPatients();updateDashboard();notify("Patient added!");
+};
+
+function renderPatients(){
+const table=document.getElementById("patientsTable");
+table.replaceChildren();
+const query=document.getElementById("search").value.toLowerCase();
+patients.filter(p=>p.name.toLowerCase().includes(query)).forEach(p=>{
+const row=document.createElement("tr");
+[p.id,p.name,p.age,p.gender,p.phone].forEach(v=>cell(row,v));
+const td=cell(row,"");
+td.appendChild(button("Delete","delete",()=>{
+patients.splice(patients.findIndex(x=>x.id===p.id),1);
+renderPatients();updateDashboard();notify("Patient deleted.");
+}));
+table.appendChild(row);
+});
+}
+
+document.getElementById("appointmentForm").onsubmit=e=>{
+e.preventDefault();
+appointments.push({
+patient:document.getElementById("appointmentPatient").value.trim(),
+doctor:document.getElementById("doctorName").value.trim(),
+date:document.getElementById("appointmentDate").value,
+time:document.getElementById("appointmentTime").value,
+status:"Booked"
+});
+e.target.reset();renderAppointments();updateDashboard();notify("Appointment booked!");
+};
+
+function renderAppointments(){
+const table=document.getElementById("appointmentsTable");
+table.replaceChildren();
+appointments.forEach((a,i)=>{
+const row=document.createElement("tr");
+[a.patient,a.doctor,a.date,a.time,a.status].forEach(v=>cell(row,v));
+const td=cell(row,"");
+td.appendChild(button("Complete","paid",()=>{
+appointments[i].status="Completed";
+renderAppointments();notify("Appointment completed.");
+}));
+td.appendChild(button("Cancel","delete",()=>{
+appointments.splice(i,1);
+renderAppointments();updateDashboard();notify("Appointment cancelled.");
+}));
+table.appendChild(row);
+});
+}
+
+document.getElementById("billForm").onsubmit=e=>{
+e.preventDefault();
+bills.push({
+patient:document.getElementById("billPatient").value.trim(),
+description:document.getElementById("description").value.trim(),
+amount:Number(document.getElementById("amount").value),
+paid:false
+});
+e.target.reset();renderBills();updateDashboard();notify("Bill created!");
+};
+
+function renderBills(){
+const table=document.getElementById("billsTable");
+table.replaceChildren();
+bills.forEach((b,i)=>{
+const row=document.createElement("tr");
+[b.patient,b.description,"₹"+b.amount.toFixed(2),b.paid?"Paid":"Unpaid"].forEach(v=>cell(row,v));
+const td=cell(row,"");
+if(!b.paid){
+td.appendChild(button("Mark Paid","paid",()=>{
+bills[i].paid=true;renderBills();updateDashboard();notify("Bill marked paid.");
+}));
+}else{td.textContent="Completed";}
+table.appendChild(row);
+});
+}
+
+function updateDashboard(){
+document.getElementById("patientCount").textContent=patients.length;
+document.getElementById("appointmentCount").textContent=appointments.length;
+document.getElementById("billCount").textContent=bills.length;
+const total=bills.filter(b=>b.paid).reduce((sum,b)=>sum+b.amount,0);
+document.getElementById("revenue").textContent="₹"+total.toLocaleString("en-IN");
+}
+document.getElementById("appointmentDate").min=new Date().toLocaleDateString("en-CA");
+updateDashboard();
+</script>
+</body>
+</html>git --version
